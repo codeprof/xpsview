@@ -1,0 +1,123 @@
+﻿<UserControl x:Class="xpsview.XpsViewer"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Height="640" Width="480" Loaded="UserControl_Loaded" KeyUp="UserControl_KeyUp" KeyDown="UserControl_KeyDown">
+
+    <UserControl.Resources>
+        <Style  x:Key="documentViewerOwnStyle" TargetType="{x:Type DocumentViewer}">
+            <!-- x:Key="documentViewerOwnStyle" TargetType="{x:Type DocumentViewer}-->
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border BorderThickness="0" BorderBrush="Black" Focusable="False">
+                            <Grid KeyboardNavigation.TabNavigation="Local">
+                                <Grid.Background>
+                                    <SolidColorBrush Color="LightGray" />
+                                </Grid.Background>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <ToolBar Name="docToolbar" Grid.Row="0" ToolBarTray.IsLocked="True" KeyboardNavigation.TabNavigation="Continue">
+
+                                    <Button Name="btnQuit" Visibility="Collapsed" Click="btnQuit_Click" Loaded="btnQuit_Loaded">
+                                        <Image Name="imgQuit" Source="/xpsview;component/Resources/exit.png" Width="24" Height="24" ToolTip="Quit Program (Alt + F4)"  Loaded="changeLanguage"/>
+                                    </Button>
+                                    <Label Name="lableQuit" Loaded="btnQuit_Loaded" Visibility="Collapsed" Width="10"></Label>
+                                    <Separator Name="sepeartorQuit" Loaded="btnQuit_Loaded" Visibility="Collapsed" />
+
+                                    <Button Name="btnPrint" Visibility="Collapsed" Click="btnPrint_Click" Loaded="PrintSupport_Loaded">
+                                        <Image Name="imgPrint" Source="/xpsview;component/Resources/printer.png" Width="24" Height="24" ToolTip="Print Document (Ctrl + P)"  Loaded="changeLanguage"/>
+                                    </Button>
+                                    <Separator Name="printSeperator" Visibility="Collapsed" Loaded="PrintSupport_Loaded" />
+
+                                    <Label Width="10"></Label>
+                                    <Button Command="NavigationCommands.IncreaseZoom" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                                        <Image Name="imgZoomIn" Source="/xpsview;component/Resources/zoom-plus.png" Width="24" Height="24" ToolTip="Zoom In (Ctrl + '+')" Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Button Command="NavigationCommands.DecreaseZoom" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                                        <Image Name="imgZommOut" Source="/xpsview;component/Resources/zoom-minus.png" Width="24" Height="24" ToolTip="Zoom Out (Ctrl + '-')" Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Label Width="10"></Label>
+                                    <Separator />
+                                    <Label Width="10"></Label>
+
+                                    <Button Command="{x:Static NavigationCommands.Zoom}" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" CommandParameter="100.0">
+                                        <Image Name="imgZoom100" Source="/xpsview;component/Resources/100-percent.png" Width="24" Height="24" ToolTip="Actual Size (Ctrl + 1)" Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Button Command="DocumentViewer.FitToWidthCommand" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                                        <Image Name="imgZoomWidth" Source="/xpsview;component/Resources/full-width.png" Width="24" Height="24" ToolTip="Fit to Width (Ctrl + 2)" Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Button Command="DocumentViewer.FitToMaxPagesAcrossCommand" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" CommandParameter="1">
+                                        <Image Name="imgWholePage" Source="/xpsview;component/Resources/full-page.png" Width="24" Height="24" ToolTip="Whole Page (Ctrl + 3)" Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Button Command="DocumentViewer.FitToMaxPagesAcrossCommand" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" CommandParameter="2">
+                                        <Image Name="imgTwoPages" Source="/xpsview;component/Resources/two-pages.png" Width="24" Height="24" ToolTip="Two Pages (Ctrl + 4)" Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Separator Name="seperatorNextPrev" Visibility="Collapsed" Loaded="seperatorNextPrev_Loaded"/>
+                                    <Label Loaded="seperatorNextPrev_Loaded" Width="10"></Label>
+                                    <Button Name="btnPrev" Visibility="Collapsed" Click="btnPrev_Click" Loaded="seperatorNextPrev_Loaded">
+                                        <Image Name="imgPrev" Source="/xpsview;component/Resources/up.png" Width="24" Height="24" ToolTip="Previous Page (Alt + arrow key left)"  Loaded="changeLanguage"/>
+                                    </Button>
+                                    <Button Name="btnNext" Visibility="Collapsed" Click="btnNext_Click"  Loaded="seperatorNextPrev_Loaded">
+                                        <Image Name="imgNext" Source="/xpsview;component/Resources/down.png" Width="24" Height="24" ToolTip="Next Page (Alt + arrow key right)"  Loaded="changeLanguage"/>
+                                    </Button>
+
+                                    <Label Width="10" Visibility="Collapsed" Loaded="seperatorNextPrev_Loaded"></Label>
+
+                                    <TextBox Name="HiddenPageNumber" Visibility="Collapsed" Text="{Binding ElementName=documentViewer,NotifyOnTargetUpdated=True,Path=MasterPageNumber,Mode=OneWay}" /> <!-- no load, this must be always collapsed-->
+                                    <TextBox Name="editPage" BorderThickness="1" BorderBrush="DarkCyan" TextAlignment="Center" Width="28" VerticalContentAlignment="Center" AllowDrop="False" AcceptsReturn="False" Loaded="editPage_Loaded"  KeyUp="editPage_KeyUp" PreviewTextInput="editPage_PreviewTextInput"  />
+                                    <Label  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3,0,0,0">/</Label>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding ElementName=documentViewer,Path=PageCount}" />
+
+                                    <Label Width="10"></Label>
+                                    <Separator />
+                                    <Label Width="10"></Label>
+
+                                    <Button Name="btnToggle" Click="btnToggle_Click">
+                                        <Image Name="imgFullscreen" Source="/xpsview;component/Resources/fullscreen.png" Width="24" Height="24" ToolTip="Toggle Fullscreen (F11)" Loaded="changeLanguage"/>
+                                    </Button>
+                                </ToolBar>
+
+                                <ScrollViewer Grid.Row="1" CanContentScroll="true" HorizontalScrollBarVisibility="Auto" x:Name="PART_ContentHost" IsTabStop="true">
+                                    <ScrollViewer.Background>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <GradientStop Color="#FFAAAAAA" Offset="0" />
+                                            <GradientStop Color="#FF999999" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </ScrollViewer.Background>
+                                </ScrollViewer>
+
+                                <ContentControl Grid.Row="2" x:Name="PART_FindToolBarHost" Visibility="Collapsed" Loaded="PART_FindToolBarHost_Loaded">
+                                </ContentControl>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+
+    <Grid>
+        <DocumentViewer Hyperlink.RequestNavigate="documentViewer_RequestNavigate" Name="documentViewer" Style="{StaticResource documentViewerOwnStyle}" TargetUpdated="documentViewer_TargetUpdated">
+            <!-- Style="{StaticResource documentViewerOwnStyle}" -->
+            <DocumentViewer.CommandBindings>
+                <CommandBinding Command="ApplicationCommands.Print" CanExecute="CommandBinding_CanExecutePrint" />
+                <CommandBinding Command="ApplicationCommands.Copy" CanExecute="CommandBinding_CanExecuteCopy" />
+            </DocumentViewer.CommandBindings>
+        </DocumentViewer>
+    </Grid>
+
+</UserControl>
